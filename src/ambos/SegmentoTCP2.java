@@ -23,10 +23,11 @@ public class SegmentoTCP2{
 	public byte ack;
 	public byte syn;
 	public byte fin;
-	public char janela_receptor;
+	public char tamanho_janela_receptor;
+	public int tamanho_dados;
 	public byte[] dados = null;
 	public SegmentoTCP2(char porta_origem, char porta_destino, int numero_de_sequencia, int numero_ack,
-			byte ack, byte syn, byte fin, char janela_receptor, byte[] dados) {
+			byte ack, byte syn, byte fin, char tamanho_janela_receptor, int tamanho_dados, byte[] dados) {
 		// TODO Auto-generated constructor stub
 		super();
 		this.porta_origem = porta_origem;
@@ -36,7 +37,8 @@ public class SegmentoTCP2{
 		this.ack = ack;
 		this.syn = syn;
 		this.fin = fin;
-		this.janela_receptor = janela_receptor;
+		this.tamanho_janela_receptor = tamanho_janela_receptor;
+		this.tamanho_dados = tamanho_dados;
 		this.dados = dados;	
 	}
 	public char getPortaOrigem() {
@@ -60,7 +62,10 @@ public class SegmentoTCP2{
 	public byte getFIN() {
 		return (byte) this.fin;
 	}
-	public char getJanelaReceptor() {
-		return (char) this.janela_receptor;
+	public char getTamanhoJanelaReceptor() {
+		return (char) this.tamanho_janela_receptor;
+	}
+	public int getTamanhoDados() {
+		return (int) this.tamanho_dados;
 	}
 }
