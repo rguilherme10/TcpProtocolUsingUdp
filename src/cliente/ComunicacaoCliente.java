@@ -1,70 +1,84 @@
 package cliente;
 
+import ambos.Comunicacao;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import ambos.Comunicacao;
-
+/**
+ * Classe responsavel por alimentar a comunicacao com os dados.
+ * 
+ * @author ribamar
+ *
+ */
 public class ComunicacaoCliente implements Runnable {
-	
-	private Comunicacao comunicacao;
-	private String nomeArquivo;
-	private int tcp_maximum_segment_size;
-	private int timeout;
-	public ComunicacaoCliente(Comunicacao comunicacao, String nomeArquivo, int tcp_maximum_segment_size, int timeout) {
-		this.comunicacao = comunicacao;
-		this.nomeArquivo = nomeArquivo;
-		this.tcp_maximum_segment_size = tcp_maximum_segment_size;
-		this.timeout = timeout;
-	}
-	
-	@Override
-	public void run() {
-		while(comunicacao.ThreeWayHandShake==false) {
-			comunicacao.enviaSyn();
-			comunicacao.esperaThreeWayHandShake(2000);
-		}
-		iniciaTransmissor();
-	}
-	private void iniciaTransmissor() {
-		
-		Thread transmissor = new Thread("ComunicacaoCliente.iniciaTransmissor") {
-			@Override
-			public void run() {
-				FileInputStream streamDoArquivo = null;
-				try {
-					streamDoArquivo = new FileInputStream(nomeArquivo);
-	                int bytesToRead = streamDoArquivo.available();
-	                if(bytesToRead>tcp_maximum_segment_size) {
-	                	bytesToRead = tcp_maximum_segment_size;
-	                }
-	                byte[] dados = new byte[bytesToRead];
-	                while (bytesToRead>0) {
-	                	streamDoArquivo.read(dados);
-	                	comunicacao.enviaDados(bytesToRead, dados, timeout);
-						try {
-							sleep(comunicacao.tempo_espera);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						bytesToRead = streamDoArquivo.available();
-		                if(bytesToRead>tcp_maximum_segment_size) {
-		                	bytesToRead = tcp_maximum_segment_size;
-		                }
-		                dados = new byte[bytesToRead];
-					}
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-				finally {
-	                try {
-						streamDoArquivo.close();
-					} catch (IOException e) {}
-					comunicacao.enviaFin();
-				}
-			}
-		};
-		transmissor.start();
-	}
+  
+  private static final long TEMPO_ESPERA_THREEWAYHANDSHAKE = 10000;
+  private Comunicacao       comunicacao;
+  private File              arquivo;
+  
+  /**
+   * Recebe comunicacao e arquivo a ser transferido.
+   * 
+   * @param comunicacao = instancia ja iniciada da Comunicacao
+   * @param arquivo     = arquivo válido a ser transmitido
+   */
+  public ComunicacaoCliente(Comunicacao comunicacao, File arquivo) {
+    this.comunicacao = comunicacao;
+    this.arquivo = arquivo;
+  }
+  
+  @Override
+  public void run() {
+    
+    while (comunicacao.threeWayHandShake == false) {
+      comunicacao.enviaSyn();
+      comunicacao.esperaThreeWayHandShake(TEMPO_ESPERA_THREEWAYHANDSHAKE);
+    }
+    
+    if (comunicacao.threeWayHandShake) {
+      
+      iniciaTransmissor();
+      
+    } else {
+      comunicacao.receptorAtivo = false;
+      comunicacao.analisaReceptorAtivo = false;
+      comunicacao.transmissorAtivo = false;
+    }
+    
+  }
+  
+  private void iniciaTransmissor() {
+    Thread transmissor = new Thread() {
+      @Override
+      public void run() {
+        FileInputStream streamDoArquivo = null;
+        try {
+          streamDoArquivo = new FileInputStream(arquivo);
+          int bytesToRead = streamDoArquivo.available();
+          bytesToRead = comunicacao.janelaTransmissora.getTamanhoProximoPacote(
+              comunicacao.tcpMaximumSegmentSize, streamDoArquivo.available());
+          byte[] dados = new byte[bytesToRead];
+          while (bytesToRead > 0) {
+            streamDoArquivo.read(dados);
+            comunicacao.enviaDados(bytesToRead, dados, comunicacao.timeout);
+            bytesToRead = comunicacao.janelaTransmissora.getTamanhoProximoPacote(
+                comunicacao.tcpMaximumSegmentSize, streamDoArquivo.available());
+            dados = new byte[bytesToRead];
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        } finally {
+          try {
+            streamDoArquivo.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          comunicacao.enviaFin();
+        }
+      }
+    };
+    transmissor.start();
+  }
 }
