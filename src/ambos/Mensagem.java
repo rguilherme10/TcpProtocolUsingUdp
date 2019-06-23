@@ -125,7 +125,7 @@ public class Mensagem implements Comparable<Mensagem> {
       byte[] receiveData = new byte[21 + tcpMaximumSegmentSize];
       DatagramPacket receivePacket = new DatagramPacket(receiveData, 21 + tcpMaximumSegmentSize);
       serverSocket.receive(receivePacket);
-      byte[] pacote = new byte[21];
+      byte[] pacote = new byte[receivePacket.getLength()];
       System.arraycopy(receivePacket.getData(), 0, pacote, 0, pacote.length);
       Pacote pacoteTcp = new Pacote(pacote);
       if (pacoteTcp.size() > 0) {
