@@ -23,11 +23,11 @@ public class TcpCliente {
       
       String nomeDoArquivo = args[0];
       String enderecoIpDoServidor = args[1];
-      int portaUdp = Integer.getInteger(args[2]);
-      int tamanhoDaJanela = Integer.getInteger(args[3]);
-      int timeout = Integer.getInteger(args[4]);
-      int tcpMaximumSegmentSize = Integer.getInteger(args[5]);
-      boolean retransmissaoAckDuplicado = (Integer.getInteger(args[6]) == 1);
+      int portaUdp = Integer.parseInt(args[2]);
+      int tamanhoDaJanela = Integer.parseInt(args[3]);
+      int timeout = Integer.parseInt(args[4]);
+      int tcpMaximumSegmentSize = Integer.parseInt(args[5]);
+      boolean retransmissaoAckDuplicado = (Integer.parseInt(args[6]) == 1);
       double probabilidadeDeDescarte = new Double(args[7]);
       
       Thread cliente = new Thread(

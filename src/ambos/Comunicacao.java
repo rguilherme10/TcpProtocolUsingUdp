@@ -55,7 +55,7 @@ public class Comunicacao {
         (int) synRecebidoDoCliente.getPortaOrigem());
     this.tcpMaximumSegmentSize = tamanhoJanela;
     this.retransmissaoAckDuplicado = false;
-    this.timeout = 0;
+    this.timeout = 2000;
     
     iniciaComunicacao(tamanhoJanela);
     
@@ -262,10 +262,10 @@ public class Comunicacao {
                     dadosRecebidos.put(mensagemJanelaReceptora.getNumeroSequencia(),
                         mensagemJanelaReceptora.getDados());
                   }
-                  
+
                   enviaAck();
                 }
-                janelaReceptora.remove(mensagemJanelaReceptora);
+                janelaReceptora.remove(mensagemJanelaReceptora); 
               }
             } catch (Exception e) {
               // TODO ignorar erro de concorrencia

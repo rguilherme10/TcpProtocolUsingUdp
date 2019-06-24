@@ -18,8 +18,8 @@ public class TcpServidor {
     if (args.length == 4) {
       
       String nomeDoArquivo = args[0];
-      int portaUdp = Integer.getInteger(args[1]);
-      int tamanhoDaJanela = Integer.getInteger(args[2]);
+      int portaUdp = Integer.parseInt(args[1]);
+      int tamanhoDaJanela = Integer.parseInt(args[2]);
       double probabilidadeDeDescarte = new Double(args[3]);
       
       Thread servidor = new Thread(
